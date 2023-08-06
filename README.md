@@ -5,7 +5,7 @@
 ## Usage
 
 ```shell
-java -jar java-sellotape-1.0-SNAPSHOT-jar-with-dependencies.jar
+java -jar java-sellotape-1.0-jar-with-dependencies.jar
 
 Usage: todolify [-o=<output>] [-m=<methodNames>[,<methodNames>...]]... PROJECT
       PROJECT
@@ -19,7 +19,7 @@ For example, Let's search for the method with the full qualified name `pkg.Test.
 The default modified output project will be **TestProject-TODOLIFY**
 
 ```shell
-java -jar java-sellotape-1.0-SNAPSHOT-jar-with-dependencies.jar \
+java -jar java-sellotape-1.0-jar-with-dependencies.jar \
   TestProject \
   -m pkg.Test.f,Test.g
 ```
