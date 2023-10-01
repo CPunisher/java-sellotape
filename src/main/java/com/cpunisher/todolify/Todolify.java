@@ -26,7 +26,6 @@ public class Todolify {
                     blockStmt.addOrphanComment(new LineComment(" TODO"));
                     n.setBody(blockStmt);
                 }
-                System.out.println(name);
                 return super.visit(n, arg);
             }
         };
