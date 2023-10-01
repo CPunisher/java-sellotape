@@ -14,6 +14,8 @@ Usage: todolify [-o=<output>] [-m=<methodNames>[,<methodNames>...]]... PROJECT
   -o, --output=<output>
 ```
 
+### Todolify
+
 For example, Let's search for the method with the full qualified name `pkg.Test.f` and `Test.g`, replacing the method body with `// TODO` in the **TestProject**
 
 The default modified output project will be **TestProject-TODOLIFY**
