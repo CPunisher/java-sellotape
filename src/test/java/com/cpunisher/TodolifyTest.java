@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TodolifyTest {
     @Test
-    void transform() {
+    void transformMethod() {
         String source = """
                 public class Main {
                     public void blank() {
@@ -44,6 +44,49 @@ public class TodolifyTest {
                         // TODO
                     }
                     public void keep() {
+                    
+                    }
+                }
+                """;
+        StaticJavaParser.getParserConfiguration().setSymbolResolver(new JavaSymbolSolver(new ReflectionTypeSolver()));
+        CompilationUnit compilationUnit = StaticJavaParser.parse(source);
+        Todolify todolify = new Todolify(List.of("Main.blank", "Main.comment", "Main.code"));
+        todolify.transform(compilationUnit);
+
+        assertEquals(StaticJavaParser.parse(expected), compilationUnit);
+    }
+
+    @Test
+    void transformFunction() {
+        String source = """
+                public class Main {
+                    public static void blank() {
+                    
+                    }
+                    public static void comment() {
+                        // Something...
+                    }
+                    public static void code() {
+                        int a = 1;
+                    }
+                    public static void keep() {
+                    
+                    }
+                }
+                """;
+
+        String expected = """
+                public class Main {
+                    public static void blank() {
+                        // TODO
+                    }
+                    public static void comment() {
+                        // TODO
+                    }
+                    public static void code() {
+                        // TODO
+                    }
+                    public static void keep() {
                     
                     }
                 }
