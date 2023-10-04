@@ -16,7 +16,7 @@ Usage: todolify [-o=<output>] [-m=<methodNames>[,<methodNames>...]]... PROJECT
 
 ### Todolify
 
-For example, Let's search for the method with the full qualified name `pkg.Test.f` and `Test.g`, replacing the method body with `// TODO` in the **TestProject**
+For example, let's search for the method with the full qualified name `pkg.Test.f` and `Test.g`, replacing the method body with `// TODO` in the **TestProject**
 
 The default modified output project will be **TestProject-TODOLIFY**
 
@@ -24,4 +24,16 @@ The default modified output project will be **TestProject-TODOLIFY**
 java -jar java-sellotape-1.0-jar-with-dependencies.jar \
   TestProject \
   -m pkg.Test.f,Test.g
+```
+
+### Hydrate
+
+For example, let's remove all method bodies of all classes in the **TestProject**, reserving their JavaDocs.
+
+The default modified output project will be **TestProject-HYDRATE**
+
+```shell
+java -jar java-sellotape-1.0-jar-with-dependencies.jar \
+  TestProject \
+  --doc
 ```
