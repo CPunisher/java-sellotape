@@ -72,4 +72,29 @@ public class HydrateTest {
 
         assertEquals(StaticJavaParser.parse(expected), compilationUnit);
     }
+
+    @Test
+    void transformConstructor() {
+        String source = """
+                public class Main {
+                    public Main() {
+                        int a = 1;
+                    }
+                }
+                """;
+
+        String expected = """
+                public class Main {
+                    public Main() {
+                    }
+                }
+                """;
+
+        StaticJavaParser.getParserConfiguration().setSymbolResolver(new JavaSymbolSolver(new ReflectionTypeSolver()));
+        CompilationUnit compilationUnit = StaticJavaParser.parse(source);
+        Hydrate hydrate = new Hydrate(false);
+        hydrate.transform(compilationUnit);
+
+        assertEquals(StaticJavaParser.parse(expected), compilationUnit);
+    }
 }
