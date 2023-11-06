@@ -21,7 +21,10 @@ public class CommandHydrate implements Runnable {
     Path output;
 
     @CommandLine.Option(names = { "-d", "--doc"})
-    boolean keepDoc;
+    boolean keepDoc = false;
+
+    @CommandLine.Option(names = { "-i", "--import"})
+    boolean keepImport = false;
 
     @Override
     public void run() {
@@ -38,7 +41,7 @@ public class CommandHydrate implements Runnable {
                 .toList();
 
         for (var compilationUnit : parseResults) {
-            Hydrate hydrate = new Hydrate(keepDoc);
+            Hydrate hydrate = new Hydrate(keepDoc, keepImport);
             hydrate.transform(compilationUnit);
         }
 

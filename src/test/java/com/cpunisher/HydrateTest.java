@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HydrateTest {
-    void assertCodeTransform(String expected, String source , boolean keepDoc) {
+    void assertCodeTransform(String expected, String source, boolean keepDoc, boolean keepImport) {
         StaticJavaParser.getParserConfiguration().setSymbolResolver(new JavaSymbolSolver(new ReflectionTypeSolver()));
         CompilationUnit compilationUnit = StaticJavaParser.parse(source);
-        Hydrate hydrate = new Hydrate(keepDoc);
+        Hydrate hydrate = new Hydrate(keepDoc, keepImport);
         hydrate.transform(compilationUnit);
 
         assertEquals(StaticJavaParser.parse(expected), compilationUnit);
@@ -22,6 +22,7 @@ public class HydrateTest {
     @Test
     void transform() {
         String source = """
+                import java.util.*;
                 public class Main {
                     /**
                     * doc
@@ -34,6 +35,7 @@ public class HydrateTest {
                 """;
 
         String expected = """
+                import java.util.*;
                 public class Main {
                     /**
                     * doc
@@ -43,7 +45,7 @@ public class HydrateTest {
                     }
                 }
                 """;
-        assertCodeTransform(expected, source, true);
+        assertCodeTransform(expected, source, true, true);
     }
 
     @Test
@@ -71,7 +73,7 @@ public class HydrateTest {
                 }
                 """;
 
-        assertCodeTransform(expected, source, false);
+        assertCodeTransform(expected, source, false, false);
     }
 
     @Test
@@ -90,7 +92,7 @@ public class HydrateTest {
                     int a = 1;
                 }
                 """;
-        assertCodeTransform(expected, source, false);
+        assertCodeTransform(expected, source, false, false);
     }
 
     @Test
@@ -112,6 +114,21 @@ public class HydrateTest {
                     }
                 }
                 """;
-        assertCodeTransform(expected, source, false);
+        assertCodeTransform(expected, source, false, false);
+    }
+
+    @Test
+    void transformImport() {
+        String source = """
+                import java.util.*;
+                public class Main {
+                }
+                """;
+
+        String expected = """
+                public class Main {
+                }
+                """;
+        assertCodeTransform(expected, source, false, false);
     }
 }
