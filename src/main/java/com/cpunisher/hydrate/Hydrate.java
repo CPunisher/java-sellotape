@@ -2,6 +2,7 @@ package com.cpunisher.hydrate;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.visitor.ModifierVisitor;
@@ -34,6 +35,14 @@ public class Hydrate {
             public Visitable visit(ConstructorDeclaration n, Object arg) {
                 BlockStmt blockStmt = new BlockStmt();
                 n.setBody(blockStmt);
+                if (!keepDoc) {
+                    n.removeJavaDocComment();
+                }
+                return super.visit(n, arg);
+            }
+
+            @Override
+            public Visitable visit(FieldDeclaration n, Object arg) {
                 if (!keepDoc) {
                     n.removeJavaDocComment();
                 }

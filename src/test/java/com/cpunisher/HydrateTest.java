@@ -10,6 +10,15 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HydrateTest {
+    void assertCodeTransform(String expected, String source , boolean keepDoc) {
+        StaticJavaParser.getParserConfiguration().setSymbolResolver(new JavaSymbolSolver(new ReflectionTypeSolver()));
+        CompilationUnit compilationUnit = StaticJavaParser.parse(source);
+        Hydrate hydrate = new Hydrate(keepDoc);
+        hydrate.transform(compilationUnit);
+
+        assertEquals(StaticJavaParser.parse(expected), compilationUnit);
+    }
+
     @Test
     void transform() {
         String source = """
@@ -34,18 +43,15 @@ public class HydrateTest {
                     }
                 }
                 """;
-
-        StaticJavaParser.getParserConfiguration().setSymbolResolver(new JavaSymbolSolver(new ReflectionTypeSolver()));
-        CompilationUnit compilationUnit = StaticJavaParser.parse(source);
-        Hydrate hydrate = new Hydrate(true);
-        hydrate.transform(compilationUnit);
-
-        assertEquals(StaticJavaParser.parse(expected), compilationUnit);
+        assertCodeTransform(expected, source, true);
     }
 
     @Test
     void transformWithoutDoc() {
         String source = """
+                /**
+                * doc
+                */
                 public class Main {
                     /**
                     * doc
@@ -65,18 +71,35 @@ public class HydrateTest {
                 }
                 """;
 
-        StaticJavaParser.getParserConfiguration().setSymbolResolver(new JavaSymbolSolver(new ReflectionTypeSolver()));
-        CompilationUnit compilationUnit = StaticJavaParser.parse(source);
-        Hydrate hydrate = new Hydrate(false);
-        hydrate.transform(compilationUnit);
+        assertCodeTransform(expected, source, false);
+    }
 
-        assertEquals(StaticJavaParser.parse(expected), compilationUnit);
+    @Test
+    void transformFieldDoc() {
+        String source = """
+                public class Main {
+                    /**
+                    * doc
+                    */
+                    int a = 1;
+                }
+                """;
+
+        String expected = """
+                public class Main {
+                    int a = 1;
+                }
+                """;
+        assertCodeTransform(expected, source, false);
     }
 
     @Test
     void transformConstructor() {
         String source = """
                 public class Main {
+                    /**
+                    * doc
+                    */
                     public Main() {
                         int a = 1;
                     }
@@ -89,12 +112,6 @@ public class HydrateTest {
                     }
                 }
                 """;
-
-        StaticJavaParser.getParserConfiguration().setSymbolResolver(new JavaSymbolSolver(new ReflectionTypeSolver()));
-        CompilationUnit compilationUnit = StaticJavaParser.parse(source);
-        Hydrate hydrate = new Hydrate(false);
-        hydrate.transform(compilationUnit);
-
-        assertEquals(StaticJavaParser.parse(expected), compilationUnit);
+        assertCodeTransform(expected, source, false);
     }
 }
