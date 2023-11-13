@@ -1,10 +1,12 @@
 package com.cpunisher.cli;
 
+import com.cpunisher.dep.DepGraph;
 import picocli.CommandLine;
 
 @CommandLine.Command(name = "java-sellotape", subcommands = {
         CommandTodolify.class,
         CommandHydrate.class,
+        CommandDepGraph.class,
 })
 public class SellotapeCLI implements Runnable {
     @CommandLine.Spec

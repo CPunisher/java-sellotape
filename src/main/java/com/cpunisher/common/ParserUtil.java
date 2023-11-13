@@ -17,6 +17,7 @@ public class ParserUtil {
 
         JavaSymbolSolver javaSymbolSolver = new JavaSymbolSolver(combinedTypeSolver);
         ParserConfiguration configuration = new ParserConfiguration();
+        configuration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
         configuration.setSymbolResolver(javaSymbolSolver);
         return new SourceRoot(project, configuration);
     }
