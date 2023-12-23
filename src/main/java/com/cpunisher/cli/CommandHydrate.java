@@ -26,6 +26,9 @@ public class CommandHydrate implements Runnable {
     @CommandLine.Option(names = { "-i", "--import"})
     boolean keepImport = false;
 
+    @CommandLine.Option(names = { "-p", "--private"})
+    boolean keepPrivate = false;
+
     @Override
     public void run() {
         if (output == null) {
@@ -41,7 +44,7 @@ public class CommandHydrate implements Runnable {
                 .toList();
 
         for (var compilationUnit : parseResults) {
-            Hydrate hydrate = new Hydrate(keepDoc, keepImport);
+            Hydrate hydrate = new Hydrate(keepDoc, keepImport, keepPrivate);
             hydrate.transform(compilationUnit);
         }
 

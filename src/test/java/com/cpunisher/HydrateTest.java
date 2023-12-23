@@ -10,10 +10,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class HydrateTest {
-    void assertCodeTransform(String expected, String source, boolean keepDoc, boolean keepImport) {
+    void assertCodeTransform(String expected, String source, boolean keepDoc, boolean keepImport, boolean keepPrivate) {
         StaticJavaParser.getParserConfiguration().setSymbolResolver(new JavaSymbolSolver(new ReflectionTypeSolver()));
         CompilationUnit compilationUnit = StaticJavaParser.parse(source);
-        Hydrate hydrate = new Hydrate(keepDoc, keepImport);
+        Hydrate hydrate = new Hydrate(keepDoc, keepImport, keepPrivate);
         hydrate.transform(compilationUnit);
 
         assertEquals(StaticJavaParser.parse(expected), compilationUnit);
@@ -24,6 +24,7 @@ public class HydrateTest {
         String source = """
                 import java.util.*;
                 public class Main {
+                    private int n = 1;
                     /**
                     * doc
                     */
@@ -37,6 +38,7 @@ public class HydrateTest {
         String expected = """
                 import java.util.*;
                 public class Main {
+                    private int n = 1;
                     /**
                     * doc
                     */
@@ -45,7 +47,7 @@ public class HydrateTest {
                     }
                 }
                 """;
-        assertCodeTransform(expected, source, true, true);
+        assertCodeTransform(expected, source, true, true, true);
     }
 
     @Test
@@ -73,7 +75,7 @@ public class HydrateTest {
                 }
                 """;
 
-        assertCodeTransform(expected, source, false, false);
+        assertCodeTransform(expected, source, false, false, false);
     }
 
     @Test
@@ -92,7 +94,7 @@ public class HydrateTest {
                     int a = 1;
                 }
                 """;
-        assertCodeTransform(expected, source, false, false);
+        assertCodeTransform(expected, source, false, false, false);
     }
 
     @Test
@@ -114,7 +116,7 @@ public class HydrateTest {
                     }
                 }
                 """;
-        assertCodeTransform(expected, source, false, false);
+        assertCodeTransform(expected, source, false, false, false);
     }
 
     @Test
@@ -129,6 +131,23 @@ public class HydrateTest {
                 public class Main {
                 }
                 """;
-        assertCodeTransform(expected, source, false, false);
+        assertCodeTransform(expected, source, false, false, false);
+    }
+
+    @Test
+    void transformPrivate() {
+        String source = """
+                public class Main {
+                    private int a;
+                    private void f() {
+                    }
+                }
+                """;
+
+        String expected = """
+                public class Main {
+                }
+                """;
+        assertCodeTransform(expected, source, false, false, false);
     }
 }

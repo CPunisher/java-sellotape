@@ -1,5 +1,6 @@
 package com.cpunisher.hydrate;
 
+import com.github.javaparser.ast.AccessSpecifier;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
@@ -13,9 +14,12 @@ public class Hydrate {
 
     private final boolean keepImport;
 
-    public Hydrate(boolean keepDoc, boolean keepImport) {
+    private final boolean keepPrivate;
+
+    public Hydrate(boolean keepDoc, boolean keepImport, boolean keepPrivate) {
         this.keepDoc = keepDoc;
         this.keepImport = keepImport;
+        this.keepPrivate = keepPrivate;
     }
 
     public void transform(CompilationUnit compilationUnit) {
@@ -121,6 +125,35 @@ public class Hydrate {
             };
 
             importVisitor.visit(compilationUnit, null);
+        }
+
+        if (!keepPrivate) {
+            var privateVisitor = new ModifierVisitor<>() {
+                @Override
+                public Visitable visit(FieldDeclaration n, Object arg) {
+                    if (n.getAccessSpecifier() == AccessSpecifier.PRIVATE) {
+                        n.remove();
+                    }
+                    return super.visit(n, arg);
+                }
+
+                @Override
+                public Visitable visit(MethodDeclaration n, Object arg) {
+                    if (n.getAccessSpecifier() == AccessSpecifier.PRIVATE) {
+                        n.remove();
+                    }
+                    return super.visit(n, arg);
+                }
+
+                @Override
+                public Visitable visit(ConstructorDeclaration n, Object arg) {
+                    if (n.getAccessSpecifier() == AccessSpecifier.PRIVATE) {
+                        n.remove();
+                    }
+                    return super.visit(n, arg);
+                }
+            };
+            privateVisitor.visit(compilationUnit, null);
         }
     }
 }
