@@ -22,11 +22,15 @@ public class DepMetricVisitor extends VoidVisitorAdapter<String> {
     private final Map<String, List<MethodCallExpr>> depMethodCalls = new HashMap<>();
     private int fieldAccessFailures = 0;
     private int methodCallFailures = 0;
+    private boolean verbose;
 
-    public DepMetricVisitor(List<CompilationUnit> projectCompilationUnits) {
+    public DepMetricVisitor(List<CompilationUnit> projectCompilationUnits, boolean verbose) {
         this.projectCompilationUnits = projectCompilationUnits;
         this.projectClassIdentifiers = getProjectClassIdentifiers();
-        System.out.println("[Classes] " + this.projectClassIdentifiers);
+        this.verbose = verbose;
+        if (verbose) {
+            System.out.println("[Classes] " + this.projectClassIdentifiers);
+        }
     }
 
     @Override
@@ -106,8 +110,8 @@ public class DepMetricVisitor extends VoidVisitorAdapter<String> {
         return methodCallFailures;
     }
 
-    public static DepMetricVisitor calculate(Map<String, List<CallableDeclaration.Signature>> todos, List<CompilationUnit> compilationUnitList) {
-        DepMetricVisitor depMetricVisitor = new DepMetricVisitor(compilationUnitList);
+    public static DepMetricVisitor calculate(Map<String, List<CallableDeclaration.Signature>> todos, List<CompilationUnit> compilationUnitList, boolean verbose) {
+        DepMetricVisitor depMetricVisitor = new DepMetricVisitor(compilationUnitList, verbose);
         for (var compilationUnit : compilationUnitList) {
             compilationUnit.walk(TypeDeclaration.class, type -> {
                 String name = type.getFullyQualifiedName().get().toString();
