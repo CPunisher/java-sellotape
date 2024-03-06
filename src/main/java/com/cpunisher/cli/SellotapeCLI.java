@@ -6,7 +6,7 @@ import picocli.CommandLine;
 @CommandLine.Command(name = "java-sellotape", subcommands = {
         CommandTodolify.class,
         CommandHydrate.class,
-        CommandDepGraph.class,
+        CommandDepMetric.class,
 })
 public class SellotapeCLI implements Runnable {
     @CommandLine.Spec

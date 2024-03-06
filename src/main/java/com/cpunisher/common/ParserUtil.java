@@ -1,6 +1,8 @@
 package com.cpunisher.common;
 
+import com.github.javaparser.ParseResult;
 import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
@@ -20,5 +22,15 @@ public class ParserUtil {
         configuration.setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_17);
         configuration.setSymbolResolver(javaSymbolSolver);
         return new SourceRoot(project, configuration);
+    }
+
+    public static SourceRoot getParserAndParse(Path project) {
+        SourceRoot sourceRoot = ParserUtil.getProjectLevelParser(project);
+        for (ParseResult<CompilationUnit> compilationUnitParseResult : sourceRoot.tryToParseParallelized()) {
+            if (!compilationUnitParseResult.isSuccessful()) {
+                throw new RuntimeException(compilationUnitParseResult.toString());
+            }
+        }
+        return sourceRoot;
     }
 }
