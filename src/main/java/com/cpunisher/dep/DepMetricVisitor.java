@@ -9,16 +9,17 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class DepMetricVisitor extends VoidVisitorAdapter<Void> {
+public class DepMetricVisitor extends VoidVisitorAdapter<String> {
     private final List<CompilationUnit> projectCompilationUnits;
     private final Set<String> projectClassIdentifiers;
-    private final List<FieldAccessExpr> depFieldAccess = new ArrayList<>();
-    private final List<MethodCallExpr> depMethodCalls = new ArrayList<>();
+    private final Map<String, List<FieldAccessExpr>> depFieldAccess = new HashMap<>();
+    private final Map<String, List<MethodCallExpr>> depMethodCalls = new HashMap<>();
     private int fieldAccessFailures = 0;
     private int methodCallFailures = 0;
 
@@ -29,34 +30,34 @@ public class DepMetricVisitor extends VoidVisitorAdapter<Void> {
     }
 
     @Override
-    public void visit(FieldAccessExpr n, Void arg) {
+    public void visit(FieldAccessExpr n, String className) {
         try {
             String name = n.getScope().calculateResolvedType().describe();
             if (projectClassIdentifiers.contains(name)) {
-                depFieldAccess.add(n);
+                depFieldAccess.computeIfAbsent(className, key -> new ArrayList<>()).add(n);
             }
         } catch (Exception e) {
             System.err.println("[FAILED] [FieldAccess] " + n + " " + e);
             fieldAccessFailures += 1;
         }
-        super.visit(n, arg);
+        super.visit(n, className);
     }
 
     @Override
-    public void visit(MethodCallExpr n, Void arg) {
+    public void visit(MethodCallExpr n, String className) {
         try {
             String name = null;
             if (n.getScope().isPresent()) {
                 name = n.getScope().get().calculateResolvedType().describe();
             }
             if (name == null || projectClassIdentifiers.contains(name)) {
-                depMethodCalls.add(n);
+                depMethodCalls.computeIfAbsent(className, key -> new ArrayList<>()).add(n);
             }
         } catch (Exception e) {
             System.err.println("[FAILED] [MethodCall] " + n + " " + e);
             methodCallFailures += 1;
         }
-        super.visit(n, arg);
+        super.visit(n, className);
     }
 
     private Set<String> getProjectClassIdentifiers() {
@@ -69,12 +70,32 @@ public class DepMetricVisitor extends VoidVisitorAdapter<Void> {
         return classes;
     }
 
-    public List<FieldAccessExpr> getDepFieldAccess() {
-        return Collections.unmodifiableList(depFieldAccess);
+    public int getProjectDepFieldAccessCount() {
+        return depFieldAccess.values()
+                .stream().mapToInt(List::size)
+                .sum();
     }
 
-    public List<MethodCallExpr> getDepMethodCalls() {
-        return Collections.unmodifiableList(depMethodCalls);
+    public int getDepFieldAccessCountOf(String name) {
+        return depFieldAccess.getOrDefault(name, Collections.EMPTY_LIST).size();
+    }
+
+    public int getProjectDepMethodCallCount() {
+        return depMethodCalls.values()
+                .stream().mapToInt(List::size)
+                .sum();
+    }
+
+    public int getDepMethodCallCountOf(String name) {
+        return depMethodCalls.getOrDefault(name, Collections.EMPTY_LIST).size();
+    }
+
+    public Map<String, List<FieldAccessExpr>> getDepFieldAccess() {
+        return Collections.unmodifiableMap(depFieldAccess);
+    }
+
+    public Map<String, List<MethodCallExpr>> getDepMethodCalls() {
+        return Collections.unmodifiableMap(depMethodCalls);
     }
 
     public int getFieldAccessFailures() {
@@ -96,7 +117,7 @@ public class DepMetricVisitor extends VoidVisitorAdapter<Void> {
 
                 todos.get(name).stream()
                         .flatMap(signature -> type.getCallablesWithSignature(signature).stream())
-                        .forEach(callable -> ((CallableDeclaration<?>) callable).accept(depMetricVisitor, null));
+                        .forEach(callable -> ((CallableDeclaration<?>) callable).accept(depMetricVisitor, name));
             });
         }
         return depMetricVisitor;

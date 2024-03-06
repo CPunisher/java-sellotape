@@ -76,11 +76,17 @@ public class CommandDepMetric implements Runnable {
         System.out.println("=============== Final Result =============== ");
         DepMetricVisitor generatedMetric = DepMetricVisitor.calculate(todos, generatedSourceRoot.getCompilationUnits());
         DepMetricVisitor solutionMetric = DepMetricVisitor.calculate(todos, solutionSourceRoot.getCompilationUnits());
-        System.out.println("G(F) = " + generatedMetric.getDepFieldAccess().size() + ", S(F) = " + solutionMetric.getDepFieldAccess().size());
-        System.out.println("G(M) = " + generatedMetric.getDepMethodCalls().size() + ", S(M) = " + solutionMetric.getDepMethodCalls().size());
+        System.out.println("G(F) = " + generatedMetric.getProjectDepFieldAccessCount() + ", S(F) = " + solutionMetric.getProjectDepFieldAccessCount());
+        System.out.println("G(M) = " + generatedMetric.getProjectDepMethodCallCount() + ", S(M) = " + solutionMetric.getProjectDepMethodCallCount());
         System.out.println("[G] FieldAccess Failures = " + generatedMetric.getFieldAccessFailures() + ", [G] MethodCall Failures = " + generatedMetric.getMethodCallFailures());
         System.out.println("[S] FieldAccess Failures = " + solutionMetric.getFieldAccessFailures() + ", [S] MethodCall Failures = " + solutionMetric.getMethodCallFailures());
-        System.out.println(generatedMetric.getDepFieldAccess());
-        System.out.println(generatedMetric.getDepMethodCalls());
+        for (var key : todos.keySet()) {
+            var gf = generatedMetric.getDepFieldAccessCountOf(key);
+            var sf = solutionMetric.getDepFieldAccessCountOf(key);
+            var gm = generatedMetric.getDepMethodCallCountOf(key);
+            var sm = solutionMetric.getDepMethodCallCountOf(key);
+            System.out.println("[" + key + "] " + "G(F) = " + gf + ", S(F) = " + sf);
+            System.out.println("[" + key + "] " + "G(M) = " + gm + ", S(M) = " + sm);
+        }
     }
 }
